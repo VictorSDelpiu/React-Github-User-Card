@@ -1,154 +1,70 @@
-import React, { Component } from "react";
-import axios from "axios";
-import UserCard from "./components/UserCard";
-import "./App.css";
+import React from 'react';
+import axios from 'axios';
+import './App.css';
 
-export default class App extends Component {
-  state = {
-    current_user: "",
-    login: "",
-    avatarURL: "",
-    url: "",
-    name: "",
-    location: "",
-    bio: "",
-    followers: [],
-    message: "",
-    errorMsg: ""
-  };
+import { Card } from '@material-ui/core'
 
-  //for single get request
-  // componentDidMount() {
-  //   axios
-  //     .get("https://api.github.com/users/VictorSDelpiu")
-  //     .then(res => {
-  //       // console.log(res.data);
-  //       this.setState({
-  //         login: res.data.login,
-  //         avatarURL: res.data.avatar_url,
-  //         name: res.data.name,
-  //         location: res.data.location
-  //       });
-  //     })
-  //     .catch(err => console.log(err));
-  // }
-
-  //for multiple get request
-  componentDidMount() {
-    axios
-      .all([
-        axios.get("https://api.github.com/users/VictorSDelpiu"),
-        axios.get("https://api.github.com/users/VictorSDelpiu/followers")
-      ])
-      .then(
-        axios.spread((userRes, followerRes) => {
-          // do something with both responses
-          // console.log("USERRES", userRes);
-          // console.log("followersRES", followerRes);
-          this.setState({
-            login: userRes.data.login,
-            avatarURL: userRes.data.avatar_url,
-            name: userRes.data.name,
-            location: userRes.data.location,
-            url: userRes.data.html_url,
-            bio: userRes.data.bio,
-            followers: followerRes.data
-          });
-        })
-      )
-      .catch(err => console.log(err));
+class App extends React.Component {
+  constructor(){
+    super();
+    this.state = {
+      user: {},
+      github: ""
+    }
   }
 
-  // componentDidUpdate(prevProps, prevState) {
-  //   //ALWAYS USE AN IF STATEMENT TO CHECK IF STATE CHANGED
-  //   if (prevState.login !== this.state.login) {
-  //     //do some stuff here
-  //   })
-  // }
+  componentDidMount() {
+    axios.get('https://api.github.com/users/VictorSDelpiu')
+    .then((res) => {
+      this.setState({
+        ...this.state,
+        user: res.data
+      }) 
+    }).catch(error => {
+      console.log(error)  
+    })
+  }
 
-  handleChanges = e => {
-    this.setState({
-      current_user: e.target.value
-    });
-  };
+  handleChanges = (e) => {
+      console.log(e.target.value)
+      console.log(e.target.name)
+      e.preventDefault();
+      this.setState({...this.state, [e.target.name]: e.target.value});
+    }
 
-  fetchUser = e => {
-    e.preventDefault();
-    axios
-      .all([
-        axios.get(`https://api.github.com/users/${this.state.current_user}`),
-        axios.get(
-          `https://api.github.com/users/${this.state.current_user}/followers`
-        )
-      ])
-      .then(
-        axios.spread((userRes, followerRes) => {
-          // do something with both responses
-          // console.log("USERRES", userRes);
-          // console.log("followersRES", followerRes);
-          this.setState({
-            login: userRes.data.login,
-            avatarURL: userRes.data.avatar_url,
-            name: userRes.data.name,
-            location: userRes.data.location,
-            url: userRes.data.html_url,
-            bio: userRes.data.bio,
-            followers: followerRes.data,
-            message: userRes.data.message,
-            errorMsg: ""
-          });
-        })
-      )
-      .catch(err => {
-        this.setState({
-          errorMsg: "Invalid user, please try again"
-        });
-      });
-  };
+  handleSearch = (e) => {
+    e.preventDefault()
+    axios.get(`https://api.github.com/users/${this.state.github}`)
+    .then((res) => {
+      this.setState({
+        ...this.state,
+        user: res.data
+      }) 
+    }).catch(error => {
+      console.log(error)  
+    })
+  }
 
   render() {
-    console.log("state", this.state);
-    // if (this.state.current_user == "") {
-    //   return (
-    //     <div>
-    //       <h4>Please enter a GitHub username</h4>
-    //       <input
-    //         type="text"
-    //         value={this.state.current_user}
-    //         onChange={this.handleChanges}
-    //       />
-    //       <button onClick={this.fetchUser}>Get user data</button>
-    //     </div>
-    //   );
-    // }
     return (
-      <div className="App">
-        <div>
-          <h4>Enter another Github user to see their info</h4>
-          <input
-            type="text"
-            value={this.state.current_user}
-            onChange={this.handleChanges}
-          />
-          <button onClick={this.fetchUser}>Get user data</button>
-          {this.state.errorMsg && (
-            <p style={{ color: "red" }}>{this.state.errorMsg}</p>
-          )}
-        </div>
-        <div className='card'>
-          {!this.state.errorMsg && (
-            <UserCard
-              login={this.state.login}
-              avatarURL={this.state.avatarURL}
-              name={this.state.name}
-              location={this.state.location}
-              followers={this.state.followers}
-              bio={this.state.bio}
-              url={this.state.url}
-            />
-          )}
-        </div>
-      </div>
+			<div>
+				<Card className="App">
+				<img src={this.state.user.avatar_url} />
+				<h1>{this.state.user.login}</h1>
+				<p>{this.state.user.bio}</p>
+				<p>Followers: {this.state.user.followers}</p>
+				<p>Following: {this.state.user.following}</p>
+				</Card>
+				<Card className="App">
+                    <form onSubmit={this.handleSearch}>
+							<input name="github" type="texts" onChange={this.handleChanges} placeholder="github handle"/>
+					<button type="submit">SEARCH</button>
+                    </form>
+				</Card>
+						
+			</div>
     );
   }
 }
+
+export default App;
