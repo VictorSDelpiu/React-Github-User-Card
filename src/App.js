@@ -23,25 +23,7 @@ class App extends React.Component {
       .catch( err => console.log(err));
   };
 
-  handleChanges = (e) => {
-      console.log(e.target.value)
-      console.log(e.target.name)
-      e.preventDefault();
-      this.setState({...this.state, [e.target.name]: e.target.value});
-    }
-
-  handleSearch = (e) => {
-    e.preventDefault()
-    axios.get(`https://api.github.com/users/${this.state.github}`)
-    .then((res) => {
-      this.setState({
-        ...this.state,
-        user: res.data
-      }) 
-    }).catch(error => {
-      console.log(error)  
-    })
-  }
+ 
 
   render() {
     return (
